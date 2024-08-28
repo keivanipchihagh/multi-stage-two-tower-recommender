@@ -66,18 +66,17 @@ class PointwiseRanking(tfrs.models.Model):
         training: bool = False
     ) -> tf.Tensor:
         """
-            Compute the loss for the ranking model.
+            Compute loss of the model.
 
             Parameters:
-                - inputs (dict): A dictionary of inputs containing the query and candidate embeddings, and the labels.
-                - training (bool): A boolean indicating whether the model is in training mode.
+                - inputs (Dict[str, tf.Tensor]): Inputs of the model.
+                - training (bool): If `True`, the model is in training mode.
 
             Returns:
-                (tf.Tensor): Task loss.
+                - (tf.Tensor): Loss of the model.
         """
         # Extracation
-        labels: tf.Tensor = inputs["score"]
-
+        labels: tf.Tensor      = inputs["score"]
         predictions: tf.Tensor = self(inputs)
 
         return self.task(

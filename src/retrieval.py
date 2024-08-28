@@ -4,9 +4,6 @@ import tensorflow_recommenders as tfrs
 
 
 class RetrievalModel(tfrs.models.Model):
-    """
-        MovieLens candidate generation model
-    """
  
     def __init__(
         self,
@@ -34,6 +31,16 @@ class RetrievalModel(tfrs.models.Model):
         inputs: Dict[str, tf.Tensor],
         training: bool = False
     ) -> tf.Tensor:
+        """
+            Compute loss of the model.
+
+            Parameters:
+                - inputs (Dict[str, tf.Tensor]): Inputs of the model.
+                - training (bool): If `True`, the model is in training mode.
+
+            Returns:
+                - (tf.Tensor): Loss of the model.
+        """
         query_embeddings: tf.Tensor     = self.query_tower(inputs)
         candidate_embeddings: tf.Tensor = self.candidate_tower(inputs)
 
