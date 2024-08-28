@@ -1,6 +1,8 @@
 from typing import Dict
 import tensorflow as tf
 
+# Third-party
+from src.utils.timer import log_execution_time
 
 class UserEmbeddingModel(tf.keras.Model):
 
@@ -23,6 +25,7 @@ class UserEmbeddingModel(tf.keras.Model):
         )
 
 
+    @log_execution_time
     def __create_id_embedding_layer(
         self,
         values,

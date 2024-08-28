@@ -1,6 +1,8 @@
 from typing import Dict
 import tensorflow as tf
 
+# Third-party
+from src.utils.timer import log_execution_time
 
 class MovieEmbeddingModel(tf.keras.Model):
 
@@ -27,6 +29,7 @@ class MovieEmbeddingModel(tf.keras.Model):
         )
 
 
+    @log_execution_time
     def __create_title_embedding_layer(
         self,
         values,
@@ -69,6 +72,7 @@ class MovieEmbeddingModel(tf.keras.Model):
         )
 
 
+    @log_execution_time
     def __create_id_embedding_layer(
         self,
         values,
