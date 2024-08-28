@@ -44,10 +44,9 @@ class RetrievalModel(tfrs.models.Model):
         query_embeddings: tf.Tensor     = self.query_tower(inputs)
         candidate_embeddings: tf.Tensor = self.candidate_tower(inputs)
 
-
         loss = self.task(
             query_embeddings     = query_embeddings,
             candidate_embeddings = candidate_embeddings,
-            compute_metrics      = not training  # Speed up training
+            compute_metrics      = not training # Speed up training
         )
         return loss
