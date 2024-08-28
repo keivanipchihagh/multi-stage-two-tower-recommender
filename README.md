@@ -3,17 +3,25 @@ A Movie Recommender System using YouTube's Two-Tower Architecture
 
 ## Getting Started
 ### Installation
-Run the following command to install the environment and dependencies:
+To set up the virtual environment and install the necessary dependencies, run the following command:
 ```bash
 make install
 ```
+This will ensure your environment is prepared with all required packages, ready to run the project.
 
 ### Usage
 ...
+Once the environment is set up, you can start using the recommender system for tasks like training, evaluation, or inference.
+- **Training the Model:**
+- **Evaluating the Model:**
+- **Inference:**
+
+## Dataset
+The primary dataset used in this project is [Movielense](https://grouplens.org/datasets/movielens/). The data is stored in the [data/](data) directory and can be automatically downloaded or linked through scripts.
 
 ## Project Structure
 - [data/](data) - Directory for storing [Movielense](https://grouplens.org/datasets/movielens/) datasets.
-- [src/](src) - Contains model definitions and architecture.
+- [src/](src) - Contains the core implementation, including model definitions, architecture, and utility functions.
 - [notebooks/](notebooks) - Jupyter notebooks for exploration and experiments.
 - [scripts/](scripts) - Utility scripts.
 
