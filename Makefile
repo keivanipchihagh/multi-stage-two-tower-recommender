@@ -1,2 +1,2 @@
 install:
-	bash install.sh
+	bash scripts/install.sh
