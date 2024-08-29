@@ -1,15 +1,19 @@
 import tensorflow as tf
 
 
-class CandidateTower(tf.keras.Model):
+class Tower(tf.keras.Model):
 
     def __init__(
         self,
         embedding_model: tf.keras.Model,
-        dense_embedding_dim,
-    ) -> 'CandidateTower':
+        dense_embedding_dim: int,
+    ) -> 'Tower':
         """
-            Candidate Tower
+            Tower Model.
+
+            Parameters:
+                - embedding_model (tf.keras.Model): The model that transforms raw inputs into embeddings.
+                - dense_embedding_dim (int): The dimension of the final embedding.
         """
         super().__init__()
 
