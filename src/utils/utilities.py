@@ -65,7 +65,8 @@ def train_test_split(
 
 def plot_history(
     history: tf.keras.callbacks.History,
-    figsize: Tuple[int, int] = (20, 7)
+    figsize: Tuple[int, int] = (20, 7),
+    plot_training: bool = True
 ) -> None:
     """
         Plot the training and validation loss and accuracy of a model.
@@ -73,6 +74,7 @@ def plot_history(
         Parameters:
             - history (tf.keras.callbacks.History): The History object returned by the fit method.
             - figsize (tuple[int, int]): The size of the figure. Defaults to (20, 7).
+            - plot_training (bool): Whether to plot the training loss and accuracy. Defaults to True.
         
         Returns:
             None
@@ -81,8 +83,8 @@ def plot_history(
 
     # Calculate the number of columns and rows
     num_losses = len(loss_names)
-    num_cols   = math.ceil(num_losses / 2)    # Set to 2 rows
-    num_rows   = 2                            # Fixed to 2 rows
+    num_cols   = math.ceil(num_losses / 3)
+    num_rows   = 3
 
     _, axes = plt.subplots(num_rows, num_cols, figsize=figsize)
 
@@ -93,8 +95,9 @@ def plot_history(
         loss: List[float]     = history.history.get(loss_name)
         loss_val: List[float] = history.history.get(f"val_{loss_name}", [0.0])
 
-        axes[i].plot(loss, label='Training')        # Loss
-        axes[i].plot(loss_val, label='Validation')  # Validation loss
+        if plot_training:
+            axes[i].plot(loss, label='Training')
+        axes[i].plot(loss_val, label='Validation')
         axes[i].set_title(f'{loss_name}')
         axes[i].legend()
 
