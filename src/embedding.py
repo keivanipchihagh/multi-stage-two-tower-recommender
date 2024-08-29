@@ -11,6 +11,7 @@ class EmbeddingModel(tf.keras.Model):
         str_features: List[str] = [],
         int_features: List[str] = [],
         text_features: List[str] = [],
+        timestamp_features: List[str] = [],
     ) -> 'EmbeddingModel':
         """
             Embedder Model.
@@ -21,12 +22,10 @@ class EmbeddingModel(tf.keras.Model):
                 - str_features (List[str]): String features. Defaults to [].
                 - int_features (List[str]): Integer features. Defaults to [].
                 - text_features (List[str]): Textual features. Defaults to [].
+                - timestamp_features (List[str]): Timestamp features. Defaults to [].
                 - oov_token (str): OOV token. Defaults to "[UNK]".
         """
         super().__init__()
-
-        self.embedding_dim = embedding_dim
-        self._all_features = str_features + int_features + text_features
 
         self._embeddings: Dict[str, tf.keras.Sequential] = {}
 
@@ -49,6 +48,14 @@ class EmbeddingModel(tf.keras.Model):
         # Textual features
         for feature in text_features:
             _embedding_layer = self.__create_text_embedding_layer(
+                values = dataset.map(lambda _: _[feature]),
+                embedding_dim = embedding_dim,
+            )
+            self._embeddings[feature] = _embedding_layer
+
+        # Timestamp features
+        for feature in timestamp_features:
+            _embedding_layer = self.__create_timestamp_embedding_layer(
                 values = dataset.map(lambda _: _[feature]),
                 embedding_dim = embedding_dim,
             )
@@ -136,9 +143,40 @@ class EmbeddingModel(tf.keras.Model):
         )
 
 
+    def __create_timestamp_embedding_layer(
+        self,
+        values: tf.data.Dataset,
+        embedding_dim: int,
+        n_buckets: int = 1000,
+    ) -> tf.keras.Sequential:
+
+        timestamps = np.concatenate(list(values))
+
+        buckets = np.linspace(
+            start = timestamps.min(),
+            stop = timestamps.max(),
+            num = n_buckets,
+        )
+
+        embedding_layer = tf.keras.layers.Embedding(
+            # Size of the vocabulary
+            input_dim = len(buckets) + 1,
+            # Dimension of the dense embedding
+            output_dim = embedding_dim
+        )
+
+        return tf.keras.Sequential(
+            [
+                tf.keras.layers.Discretization(buckets.tolist()),
+                embedding_layer,
+                tf.keras.layers.Normalization(axis = None)
+            ]
+        )
+
+
     def __create_int_embedding_layer(
         self,
-        values,
+        values: tf.data.Dataset,
         embedding_dim: int,
     ) -> tf.keras.Sequential:
         """
@@ -189,7 +227,7 @@ class EmbeddingModel(tf.keras.Model):
                 - (tf.tensor): returns the concatenated embeddings.
         """
         embeddings: List[tf.Tensor] = []
-        for feature in self._all_features:
+        for feature in self._embeddings.keys():
             embedding_layer = self._embeddings[feature]
             embedding = embedding_layer(inputs[feature])
             embeddings.append(embedding)
