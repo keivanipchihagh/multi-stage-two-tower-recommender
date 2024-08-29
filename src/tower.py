@@ -1,5 +1,6 @@
-from copy import deepcopy
+from typing import List
 import tensorflow as tf
+from copy import deepcopy
 import tensorflow_recommenders as tfrs
 
 # Third-party
@@ -11,7 +12,7 @@ class Tower(tf.keras.Model):
         self,
         embedding_model: EmbeddingModel,
         cross_layer: tfrs.layers.dcn.Cross = None,
-        deep_layers: tf.keras.Sequential = None,
+        dense_layers_sizes: List[int] = [],
     ) -> 'Tower':
         """
             Tower Model.
@@ -19,18 +20,26 @@ class Tower(tf.keras.Model):
             Parameters:
                 - embedding_model (tf.keras.Model): a model that transforms inputs to embeddings.
                 - cross_layer (tfrs.layers.dcn.Cross): a Cross layer to perform feature crossing. Defaults to `None`.
-                - deep_layers (tf.keras.Sequential): a sequence of layers to perform deep feature interaction. Defaults to `None`.
+                - dense_layers_sizes (tf.keras.Sequential): a sequence of layers to perform deep feature interaction. Defaults to `[]`.
         
         """
         super().__init__()
 
         self._embedding_model = embedding_model
         self._cross_layer = deepcopy(cross_layer) if cross_layer else None
-        self._deep_layers = deepcopy(deep_layers) if deep_layers else None
 
-        self._last_dense = tf.keras.Sequential([
-            tf.keras.layers.Dense(32),
-        ])
+        self._dense_layers = tf.keras.Sequential(
+            # With ReLU activation
+            [
+                tf.keras.layers.Dense(layer_size, activation="relu")
+                for layer_size in dense_layers_sizes[:-1]
+            ] +
+            # Without activation
+            [
+                tf.keras.layers.Dense(dense_layers_sizes[-1])
+            ]
+        )
+
 
     def call(
         self,
@@ -47,6 +56,5 @@ class Tower(tf.keras.Model):
         """
         x = self._embedding_model(inputs)
         x = self._cross_layer(x) if self._cross_layer else x
-        x = self._deep_layers(x) if self._deep_layers else x
-        x = self._last_dense(x)
+        x = self._dense_layers(x) if self._dense_layers else x
         return x
