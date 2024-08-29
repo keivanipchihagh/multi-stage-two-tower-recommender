@@ -1,42 +1,62 @@
-from typing import Dict
 import tensorflow as tf
+from typing import Dict, List
 
 # Third-party
 from src.utils.timer import log_execution_time
 
-class MovieEmbeddingModel(tf.keras.Model):
+class EmbeddingModel(tf.keras.Model):
 
     def __init__(
         self,
-        dataset,
+        dataset: tf.data.Dataset,
         embedding_dim: int,
+        str_features: List[str] = [],
+        text_features: List[str] = [],
         oov_token: str = "[UNK]",
-    ) -> 'MovieEmbeddingModel':
+    ) -> 'EmbeddingModel':
         """
-            Movie Embedding Model
+            Embedder Model.
+
+            Parameters:
+                - dataset (tf.data.Dataset): Values to make embeddings for.
+                - embedding_dim (int): Embeddimg dimentionality.
+                - str_features (List[str]): String features.
+                - text_features (List[str]): Textual features.
+                - oov_token (str): OOV token. Defaults to "[UNK]".
         """
         super().__init__()
 
-        self.oov_token = oov_token
+        self._oov_token    = oov_token
+        self._all_features = str_features + text_features
 
-        self.id_embedding_layer = self.__create_id_embedding_layer(
-            values = dataset.map(lambda _: _['movie_id']),
-            embedding_dim = embedding_dim,
-        )
-        self.title_embedding_layer = self.__create_title_embedding_layer(
-            values = dataset.map(lambda _: _['movie_title']),
-            embedding_dim = embedding_dim,
-        )
+        self._embeddings: Dict[str, tf.keras.Sequential] = {}
+
+        # String features
+        for feature in str_features:
+            _embedding_layer = self.__create_str_embedding_layer(
+                values = dataset.map(lambda _: _[feature]),
+                embedding_dim = embedding_dim,
+            )
+            self._embeddings[feature] = _embedding_layer
+
+        # Textual features
+        for feature in text_features:
+            _embedding_layer = self.__create_text_embedding_layer(
+                values = dataset.map(lambda _: _[feature]),
+                embedding_dim = embedding_dim,
+            )
+            self._embeddings[feature] = _embedding_layer
 
 
     @log_execution_time
-    def __create_title_embedding_layer(
+    def __create_text_embedding_layer(
         self,
         values,
         embedding_dim: int
     ) -> tf.keras.Sequential:
         """
-            Build a model that takes raw values in and yields embeddings.
+            Build a model that takes raw text values in and yields embeddings
+            using a text vectorization.
 
             parameters:
                 - values (tf.data.Dataset): Values to make embeddings for.
@@ -73,13 +93,14 @@ class MovieEmbeddingModel(tf.keras.Model):
 
 
     @log_execution_time
-    def __create_id_embedding_layer(
+    def __create_str_embedding_layer(
         self,
         values,
         embedding_dim: int
     ) -> tf.keras.Sequential:
         """
-            Build a model that takes raw values in and yields embeddings.
+            Build a model that takes raw string values in and yields embeddings
+            using a table-based vocabulary string lookup.
 
             parameters:
                 - values (tf.data.Dataset): Values to make embeddings for.
@@ -92,7 +113,7 @@ class MovieEmbeddingModel(tf.keras.Model):
         lookup_layer = tf.keras.layers.StringLookup(
             mask_token = None,
             # Out of Vocabulary Token
-            oov_token = self.oov_token,
+            oov_token = self._oov_token,
         )
 
         # StringLookup layer is a non-trainable layer and its state (the vocabulary)
@@ -127,17 +148,10 @@ class MovieEmbeddingModel(tf.keras.Model):
             Returns:
                 - (tf.tensor): returns the concatenated embeddings.
         """
-        # Extracation
-        id: tf.Tensor    = inputs["movie_id"]
-        title: tf.Tensor = inputs["movie_title"]
+        embeddings: List[tf.Tensor] = []
+        for feature in self._all_features:
+            embedding_layer = self._embeddings[feature]
+            embedding = embedding_layer(inputs[feature])
+            embeddings.append(embedding)
 
-        # Create embeddings
-        id_embedding: tf.Tensor    = self.id_embedding_layer(id)
-        title_embedding: tf.Tensor = self.title_embedding_layer(title)
-
-        return tf.concat(
-            [
-                id_embedding,
-                title_embedding
-            ], axis=1
-        )
+        return tf.concat(embeddings, axis=1)

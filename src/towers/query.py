@@ -1,28 +1,22 @@
 import tensorflow as tf
 
-# Third-party
-from src.models.user import UserEmbeddingModel
-
 
 class QueryTower(tf.keras.Model):
 
     def __init__(
         self,
-        dataset,
-        embedding_dim,
+        embedding_model: tf.keras.Model,
+        dense_embedding_dim,
     ) -> 'QueryTower':
         """
             Query Tower
         """
         super().__init__()
 
-        self.embedding_model = UserEmbeddingModel(
-            dataset = dataset,
-            embedding_dim = embedding_dim
-        )
+        self.embedding_model = embedding_model
 
         self.dense = tf.keras.Sequential([
-            tf.keras.layers.Dense(embedding_dim),
+            tf.keras.layers.Dense(dense_embedding_dim),
         ])
 
 
