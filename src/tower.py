@@ -2,11 +2,14 @@ from copy import deepcopy
 import tensorflow as tf
 import tensorflow_recommenders as tfrs
 
+# Third-party
+from src.embedding import EmbeddingModel
+
 class Tower(tf.keras.Model):
 
     def __init__(
         self,
-        embedding_model: tf.keras.Model,
+        embedding_model: EmbeddingModel,
         cross_layer: tfrs.layers.dcn.Cross = None,
         deep_layers: tf.keras.Sequential = None,
     ) -> 'Tower':
@@ -22,9 +25,12 @@ class Tower(tf.keras.Model):
         super().__init__()
 
         self._embedding_model = embedding_model
-        self._cross_layer = deepcopy(cross_layer)
-        self._deep_layers = deepcopy(deep_layers)
+        self._cross_layer = deepcopy(cross_layer) if cross_layer else None
+        self._deep_layers = deepcopy(deep_layers) if deep_layers else None
 
+        self._last_dense = tf.keras.Sequential([
+            tf.keras.layers.Dense(32),
+        ])
 
     def call(
         self,
@@ -42,4 +48,5 @@ class Tower(tf.keras.Model):
         x = self._embedding_model(inputs)
         x = self._cross_layer(x) if self._cross_layer else x
         x = self._deep_layers(x) if self._deep_layers else x
+        x = self._last_dense(x)
         return x
