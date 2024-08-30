@@ -76,7 +76,7 @@ class PointwiseRanking(tfrs.models.Model):
                 - (tf.Tensor): Loss of the model.
         """
         # Extracation
-        labels: tf.Tensor      = inputs["score"]
+        labels: tf.Tensor      = inputs["user_rating"]
         predictions: tf.Tensor = self(inputs)
 
         return self.task(

@@ -36,7 +36,8 @@ class Tower(tf.keras.Model):
             ] +
             # Without activation
             [
-                tf.keras.layers.Dense(dense_layers_sizes[-1])
+                tf.keras.layers.Dense(layer_size)
+                for layer_size in dense_layers_sizes[-1:]
             ]
         )
 

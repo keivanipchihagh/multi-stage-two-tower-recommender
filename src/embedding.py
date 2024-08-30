@@ -64,7 +64,7 @@ class EmbeddingModel(tf.keras.Model):
 
     def __create_text_embedding_layer(
         self,
-        values,
+        values: tf.data.Dataset,
         embedding_dim: int
     ) -> tf.keras.Sequential:
         """
