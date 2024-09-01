@@ -12,7 +12,7 @@ class Tower(tf.keras.Model):
         self,
         embedding_model: EmbeddingModel,
         cross_layer: tfrs.layers.dcn.Cross = None,
-        dense_layers_sizes: List[int] = [],
+        dense_layers: List[int] = [],
     ) -> 'Tower':
         """
             Tower Model.
@@ -20,8 +20,7 @@ class Tower(tf.keras.Model):
             Parameters:
                 - embedding_model (tf.keras.Model): a model that transforms inputs to embeddings.
                 - cross_layer (tfrs.layers.dcn.Cross): a Cross layer to perform feature crossing. Defaults to `None`.
-                - dense_layers_sizes (tf.keras.Sequential): a sequence of layers to perform deep feature interaction. Defaults to `[]`.
-        
+                - densdense_layerse_layers_sizes (tf.keras.Sequential): a sequence of layers to perform deep feature interaction. Defaults to `[]`.
         """
         super().__init__()
 
@@ -32,12 +31,12 @@ class Tower(tf.keras.Model):
             # With ReLU activation
             [
                 tf.keras.layers.Dense(layer_size, activation="relu")
-                for layer_size in dense_layers_sizes[:-1]
+                for layer_size in dense_layers[:-1]
             ] +
             # Without activation
             [
                 tf.keras.layers.Dense(layer_size)
-                for layer_size in dense_layers_sizes[-1:]
+                for layer_size in dense_layers[-1:]
             ]
         )
 
