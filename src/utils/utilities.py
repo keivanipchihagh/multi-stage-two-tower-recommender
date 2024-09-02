@@ -1,26 +1,36 @@
 import math
+import collections
+import numpy as np
 import pandas as pd
 import tensorflow as tf
-from typing import List, Tuple
 import matplotlib.pyplot as plt
+from typing import List, Tuple, Optional, Dict, Text
 
 plt.style.use('seaborn-v0_8')
 
 
-def dataframe_to_Dataset(
-    df: pd.DataFrame,
-    columns: List[str]
+def parquet_to_Dataset(
+    path: str,
+    include_columns: Optional[List[str]] = None,
+    exclude_columns: Optional[List[str]] = None,
 ) -> tf.data.Dataset:
     """
-        Convert a pandas DataFrame into a TensorFlow Dataset.
+        Reads and convert a parquet file into a TensorFlow Dataset.
 
         Parameters:
-        - df (pd.DataFrame): The pandas DataFrame to be converted.
-        - columns (List[str]): The list of column names to be converted into a Dataset.
+            - path (str): The path to the parquet file.
+            - exclude_columns (List[str]): The columns to exclude from the Dataset. Defaults to `None`.
+            - include_columns (List[str]): The columns to include in the Dataset. Defaults to `None`.
 
         Returns:
             - (tf.data.Dataset): The TensorFlow Dataset created from the DataFrame.
     """
+    df = pd.read_parquet(path)
+    columns = df.columns
+
+    if exclude_columns: columns = [_ for _ in columns if (_ not in exclude_columns)]
+    if include_columns: columns = [_ for _ in columns if (_ in include_columns)]
+
     return tf.data.Dataset.from_tensor_slices(dict(df[columns]))
 
 
@@ -103,3 +113,98 @@ def plot_history(
 
     plt.tight_layout()
     plt.show()
+
+
+def _create_feature_dict(features: List[Text]) -> Dict[Text, List[tf.Tensor]]:
+    """Helper function for creating an empty feature dict for defaultdict."""
+    return {key: [] for key in features if key != 'user_id'}
+
+
+def _sample_list(
+    feature_lists: Dict[Text, List[tf.Tensor]],
+    num_examples_per_list: int,
+    random_state: Optional[np.random.RandomState] = None,
+) -> Tuple[tf.Tensor, tf.Tensor]:
+    """Function for sampling a list example from given feature lists."""
+    if random_state is None:
+        random_state = np.random.RandomState()
+
+    sampled_indices = random_state.choice(
+        range(len(feature_lists["user_rating"])),
+        size=num_examples_per_list,
+        replace=False,
+    )
+
+    sampled_features = {}
+    for name, values in feature_lists.items():
+        sampled_features[name] = [
+            values[idx] for idx in sampled_indices
+        ]
+
+    return {
+        name: tf.stack(values, 0)
+        for name, values in sampled_features.items()
+    }
+
+
+def sample_listwise(
+    rating_dataset: tf.data.Dataset,
+    num_list_per_user: int = 10,
+    num_examples_per_list: int = 10,
+    seed: Optional[int] = None,
+) -> tf.data.Dataset:
+    """Function for converting the MovieLens 100K dataset to a listwise dataset.
+
+    Args:
+        rating_dataset:
+        The MovieLens ratings dataset loaded from TFDS. Feature must be  provided
+        in the dataset. The dataset must contain the "user_rating" feature.
+        num_list_per_user:
+        An integer representing the number of lists that should be sampled for
+        each user in the training dataset.
+        num_examples_per_list:
+        An integer representing the number of movies to be sampled for each list
+        from the list of movies rated by the user.
+        seed:
+        An integer for creating `np.random.RandomState`.
+
+    Returns:
+        A tf.data.Dataset containing list examples.
+
+        Each example contains multiple keys. "user_id" maps to a string 
+        tensor that represents the user id for the example. "movie_title" maps 
+        to a tensor of shape [sum(num_example_per_list)] with dtype tf.string. 
+        It represents the list of candidate movie ids. "user_rating" maps to 
+        a tensor of shape [sum(num_example_per_list)] with dtype tf.float32. 
+        It represents the rating of each movie in the candidate list.
+    """
+    random_state = np.random.RandomState(seed)
+
+    features = rating_dataset.take(1).get_single_element().keys()
+    example_lists_by_user = collections.defaultdict(lambda: _create_feature_dict(features))
+
+    for example in rating_dataset:
+        user_id = example.pop('user_id').numpy()
+        for key, value in example.items():
+            example_lists_by_user[user_id][key].append(value.numpy())
+
+    tensor_slices = {key: [] for key in features}
+
+    for user_id, feature_lists in example_lists_by_user.items():
+        for _ in range(num_list_per_user):
+
+            # Drop the user if they don't have enough ratings.
+            if len(feature_lists["user_rating"]) < num_examples_per_list:
+                continue
+
+            sampled_features = _sample_list(
+                feature_lists,
+                num_examples_per_list,
+                random_state=random_state,
+            )
+            tensor_slices["user_id"].append(user_id)
+
+            for feature, samples in sampled_features.items():
+                tensor_slices[feature].append(samples)
+
+    return tf.data.Dataset.from_tensor_slices(tensor_slices)

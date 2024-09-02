@@ -20,15 +20,14 @@ Once the environment is set up, you can start using the recommender system for t
 The primary dataset used in this project is [Movielense](https://grouplens.org/datasets/movielens/). The data is stored in the [data/](data) directory and can be automatically downloaded or linked through scripts.
 
 ## Project Structure
-- [data/](data) - Directory for storing [Movielense](https://grouplens.org/datasets/movielens/) datasets.
+- [data/](data) - Directory for storing [Movielense](https://grouplens.org/datasets/movielens/) datasets (*100k* and *1m* versions) as parquet files.
 - [src/](src) - Contains the core implementation, including model definitions, architecture, and utility functions.
-- [notebooks/](notebooks) - Jupyter notebooks for exploration and experiments.
 - [scripts/](scripts) - Utility scripts.
 
 
 ## References
 - [Deep Neural Networks for YouTube Recommendations](https://research.google.com/pubs/archive/45530.pdf)
-- [Tensorflow Ranking](https://github.com/tensorflow/ranking)
+- [Tensorflow Ranking (TFR)](https://github.com/tensorflow/ranking)
 - [TensorFlow Recommenders (TFRS)](https://github.com/tensorflow/recommenders)
 
 ## License
