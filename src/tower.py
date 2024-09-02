@@ -4,13 +4,13 @@ from copy import deepcopy
 import tensorflow_recommenders as tfrs
 
 # Third-party
-from src.embedding import EmbeddingModel
+from src.embedding import Embedding
 
 class Tower(tf.keras.Model):
 
     def __init__(
         self,
-        embedding_model: EmbeddingModel,
+        embedding_model: Embedding,
         cross_layer: tfrs.layers.dcn.Cross = None,
         dense_layers: List[int] = [],
     ) -> 'Tower':

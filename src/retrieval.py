@@ -3,20 +3,20 @@ import tensorflow as tf
 import tensorflow_recommenders as tfrs
 
 
-class RetrievalModel(tfrs.models.Model):
+class Retrieval(tfrs.models.Model):
  
     def __init__(
         self,
         query_tower: tf.keras.Model,
         candidate_tower: tf.keras.Model,
         task: tf.keras.layers.Layer,
-    ) -> 'RetrievalModel':
+    ) -> 'Retrieval':
         """
             Retrieval Model.
 
             Parameters:
-                - query_tower (tf.keras.Model): Model for query tower.
-                - candidate_tower (tf.keras.Model): Model for candidate tower.
+                - query_tower (tf.keras.Model): Query tower model.
+                - candidate_tower (tf.keras.Model): Candidate tower model.
                 - task (tfrs.tasks.Retrieval): Retrieval task for training.
         """
         super().__init__()

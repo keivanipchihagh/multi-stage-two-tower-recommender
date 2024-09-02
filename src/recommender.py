@@ -3,7 +3,7 @@ from typing import Dict, Tuple
 import tensorflow_recommenders as tfrs
 
 # Third-party
-from src.retrieval import RetrievalModel
+from src.retrieval import Retrieval
 from src.rankings.pointwise import PointwiseRanking
 
 
@@ -60,7 +60,7 @@ class RecommenderModel(tfrs.models.Model):
     def __create_retrieval_model(
         self,
         task: tfrs.tasks.Retrieval
-    ) -> RetrievalModel:
+    ) -> Retrieval:
         """
             Create a retrieval model.
 
@@ -68,9 +68,9 @@ class RecommenderModel(tfrs.models.Model):
                 - task (tfrs.tasks.Retrieval): A task for retrieval.
 
             Returns:
-                - (RetrievalModel): A model for retrieval.
+                - (Retrieval): A model for retrieval.
         """
-        return RetrievalModel(
+        return Retrieval(
             query_tower     = self.query_tower,
             candidate_tower = self.candidate_tower,
             task            = task

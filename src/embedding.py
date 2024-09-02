@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 from typing import Dict, List
 
-class EmbeddingModel(tf.keras.Model):
+class Embedding(tf.keras.Model):
 
     def __init__(
         self,
@@ -12,7 +12,7 @@ class EmbeddingModel(tf.keras.Model):
         int_features: List[str] = [],
         text_features: List[str] = [],
         timestamp_features: List[str] = [],
-    ) -> 'EmbeddingModel':
+    ) -> 'Embedding':
         """
             Embedder Model.
 
@@ -218,7 +218,8 @@ class EmbeddingModel(tf.keras.Model):
         inputs: Dict[str, tf.Tensor],
     ) -> tf.Tensor:
         """
-            Calls the model on inputs.
+            Calls the model on inputs.  Takes dict of input features and returns 
+            the concatenated embeddings.
 
             Parameters:
                 - inputs (Dict[str, tf.Tensor]): Dictionary of Tensors.

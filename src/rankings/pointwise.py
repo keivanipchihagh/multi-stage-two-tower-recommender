@@ -15,8 +15,8 @@ class PointwiseRanking(tfrs.models.Model):
             Pointwise Ranking Model.
 
             Parameters:
-                - query_tower (tf.keras.Model): Model for query tower.
-                - candidate_tower (tf.keras.Model): Model for candidate tower.
+                - query_tower (tf.keras.Model): Query tower model.
+                - candidate_tower (tf.keras.Model): Candidate tower model.
                 - task (tfrs.tasks.Ranking): Ranking task for training.
         """
         super().__init__()
@@ -39,13 +39,14 @@ class PointwiseRanking(tfrs.models.Model):
         inputs: Dict[str, tf.Tensor]
     ) -> tf.Tensor:
         """
-            Call method of the model. Takes dict of inputs and returns predictions.
+            Call method of the model. Takes dict of input features and returns 
+            predictions.
 
             Parameters:
                 - inputs (Dict[str, tf.Tensor]): Dictionary of input Tensors.
 
             Returns:
-                (tf.Tensor): Ranking scores of shape `(batch_size,)`
+                (tf.Tensor): Ranking scores.
         """
         query_embeddings: tf.Tensor     = self.query_tower(inputs)
         candidate_embeddings: tf.Tensor = self.candidate_tower(inputs)
