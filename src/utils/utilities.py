@@ -117,7 +117,7 @@ def plot_history(
 
 def _create_feature_dict(features: List[Text]) -> Dict[Text, List[tf.Tensor]]:
     """Helper function for creating an empty feature dict for defaultdict."""
-    return {key: [] for key in features if key != 'user_id'}
+    return {key: [] for key in features}
 
 
 def _sample_list(
@@ -184,7 +184,7 @@ def sample_listwise(
     example_lists_by_user = collections.defaultdict(lambda: _create_feature_dict(features))
 
     for example in rating_dataset:
-        user_id = example.pop('user_id').numpy()
+        user_id = example.get('user_id').numpy()
         for key, value in example.items():
             example_lists_by_user[user_id][key].append(value.numpy())
 
@@ -202,7 +202,6 @@ def sample_listwise(
                 num_examples_per_list,
                 random_state=random_state,
             )
-            tensor_slices["user_id"].append(user_id)
 
             for feature, samples in sampled_features.items():
                 tensor_slices[feature].append(samples)

@@ -51,17 +51,10 @@ class ListwiseRanking(tfrs.models.Model):
         query_embeddings: tf.Tensor     = self.query_tower(inputs)
         candidate_embeddings: tf.Tensor = self.candidate_tower(inputs)
 
-        list_length = inputs["movie_title"].shape[1]
-        query_embeddings_repeated = tf.repeat(
-            tf.expand_dims(query_embeddings, 1),
-            [list_length],
-            axis=1
-        )
-
         return self.rating_model(
             tf.concat(
                 [
-                    query_embeddings_repeated,
+                    query_embeddings,
                     candidate_embeddings
                 ], axis=2
             )

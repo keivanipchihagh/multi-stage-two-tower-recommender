@@ -233,4 +233,4 @@ class Embedding(tf.keras.Model):
             embedding = embedding_layer(inputs[feature])
             embeddings.append(embedding)
 
-        return tf.concat(embeddings, axis=1)
+        return tf.concat(embeddings, axis=2)
