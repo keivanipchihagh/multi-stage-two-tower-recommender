@@ -39,7 +39,7 @@ def train_test_split(
     train_size: float,
     buffer_size: int = tf.data.UNKNOWN_CARDINALITY,
     random_state: int = None,
-) -> tf.data.Dataset:
+) -> Tuple[tf.data.Dataset, tf.data.Dataset]:
     """
         Split a dataset into train and test sets.
 
@@ -50,7 +50,7 @@ def train_test_split(
             - random_state (int): The random seed used to create the distribution.
 
         Returns:
-            - (tf.data.Dataset, tf.data.Dataset): The train and test datasets.
+            - Tuple(tf.data.Dataset, tf.data.Dataset): The train and test datasets.
     """
     # Shuffle the elements of the dataset randomly.
     dataset_shuffled = dataset.shuffle(
