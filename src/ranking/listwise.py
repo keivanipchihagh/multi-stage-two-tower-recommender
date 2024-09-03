@@ -2,36 +2,26 @@ from typing import Dict
 import tensorflow as tf
 import tensorflow_recommenders as tfrs
 
+# Third-party
+from src.ranking.base import BaseRanking
 
-class PointwiseRanking(tfrs.models.Model):
+class ListwiseRanking(BaseRanking):
 
     def __init__(
         self,
         query_tower: tf.keras.Model,
         candidate_tower: tf.keras.Model,
         task: tfrs.tasks.Ranking,
-    ) -> 'PointwiseRanking':
+    ) -> 'ListwiseRanking':
         """
-            Pointwise Ranking Model.
+            Listwise Ranking Model.
 
             Parameters:
                 - query_tower (tf.keras.Model): Query tower model.
                 - candidate_tower (tf.keras.Model): Candidate tower model.
                 - task (tfrs.tasks.Ranking): Ranking task for training.
         """
-        super().__init__()
-
-        self.query_tower     = query_tower
-        self.candidate_tower = candidate_tower
-        self.task            = task
-
-        self.rating_model = tf.keras.Sequential(
-            [
-                tf.keras.layers.Dense(256, activation='relu'),
-                tf.keras.layers.Dense(64, activation='relu'),
-                tf.keras.layers.Dense(1)
-            ]
-        )
+        super().__init__(query_tower, candidate_tower, task)
 
 
     def call(
@@ -56,7 +46,7 @@ class PointwiseRanking(tfrs.models.Model):
                 [
                     query_embeddings,
                     candidate_embeddings
-                ], axis=1
+                ], axis=2
             )
         )
 
@@ -81,7 +71,7 @@ class PointwiseRanking(tfrs.models.Model):
         predictions: tf.Tensor = self(inputs)
 
         return self.task(
-            predictions     = predictions,
+            predictions     = tf.squeeze(predictions, axis=-1),
             labels          = labels,
-            compute_metrics = not training  # Speed up training
+            compute_metrics = not training
         )

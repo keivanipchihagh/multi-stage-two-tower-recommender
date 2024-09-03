@@ -4,8 +4,7 @@ import tensorflow_recommenders as tfrs
 
 # Third-party
 from src.retrieval import Retrieval
-from src.rankings.pointwise import PointwiseRanking
-
+from src.ranking.base import BaseRanking
 
 class RecommenderModel(tfrs.models.Model):
  
@@ -13,8 +12,8 @@ class RecommenderModel(tfrs.models.Model):
         self,
         query_tower: tf.keras.Model,
         candidate_tower: tf.keras.Model,
-        ranking_task: tfrs.tasks.Ranking,
-        retrieval_task: tfrs.tasks.Retrieval,
+        ranking_model: BaseRanking,
+        retrieval_model: Retrieval,
         ranking_weight: float = 1.0,
         retrieval_weight: float = 1.0,
     ) -> 'RecommenderModel':
@@ -22,12 +21,12 @@ class RecommenderModel(tfrs.models.Model):
             Initializes a RecommenderModel.
 
             Parameters:
-                - query_tower (tf.keras.Model): A model for computing query embeddings.
-                - candidate_tower (tf.keras.Model): A model for computing candidate embeddings.
-                - ranking_task (tfrs.tasks.Ranking): A task for ranking.
-                - retrieval_task (tfrs.tasks.Retrieval): A task for retrieval.
-                - ranking_weight (float, optional): The weight for ranking loss. Defaults to 1.0.
-                - retrieval_weight (float, optional): The weight for retrieval loss. Defaults to 1.0.
+                - query_tower (tf.keras.Model): The query tower of the model, which takes in queries and outputs a dense embedding.
+                - candidate_tower (tf.keras.Model): The candidate tower of the model, which takes in candidates and outputs a dense embedding.
+                - ranking_model (BaseRanking): The ranking task of the model. This task takes in the embeddings from the query and candidate towers and outputs a score for each candidate.
+                - Retrieval_model (Retrieval): The retrieval task of the model. This task takes in the embeddings from the query and candidate towers and outputs a list of candidates.
+                - ranking_weight (float): The weight given to the ranking task. Defaults to 1.0.
+                - retrieval_weight (float): The weight given to the retrieval task. Defaults to 1.0.
         """
         super().__init__()
 
@@ -35,46 +34,8 @@ class RecommenderModel(tfrs.models.Model):
         self.candidate_tower  = candidate_tower
         self.ranking_weight   = ranking_weight
         self.retrieval_weight = retrieval_weight
-
-        self.ranking_model   = self.__create_ranking_model(ranking_task)
-        self.retrieval_model = self.__create_retrieval_model(retrieval_task)
-
-
-    def __create_ranking_model(
-        self,
-        task: tfrs.tasks.Ranking
-    ) -> PointwiseRanking:
-        """
-            Create a ranking model.
-
-            Parameters:
-                - (tfrs.tasks.Ranking): A model for ranking.
-        """
-        return PointwiseRanking(
-            query_tower     = self.query_tower,
-            candidate_tower = self.candidate_tower,
-            task            = task
-        )
-
-
-    def __create_retrieval_model(
-        self,
-        task: tfrs.tasks.Retrieval
-    ) -> Retrieval:
-        """
-            Create a retrieval model.
-
-            Parameters:
-                - task (tfrs.tasks.Retrieval): A task for retrieval.
-
-            Returns:
-                - (Retrieval): A model for retrieval.
-        """
-        return Retrieval(
-            query_tower     = self.query_tower,
-            candidate_tower = self.candidate_tower,
-            task            = task
-        )
+        self.ranking_model    = ranking_model
+        self.retrieval_model  = retrieval_model
 
 
     def call(

@@ -1,4 +1,4 @@
-# two-tower-recommender
+# Multi-Stage Two-Tower Recommender
 A Movie Recommender System using YouTube's Two-Tower Architecture
 
 ## Getting Started

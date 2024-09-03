@@ -13,6 +13,7 @@ def parquet_to_Dataset(
     path: str,
     include_columns: Optional[List[str]] = None,
     exclude_columns: Optional[List[str]] = None,
+    count: Optional[int] = None,
 ) -> tf.data.Dataset:
     """
         Reads and convert a parquet file into a TensorFlow Dataset.
@@ -21,6 +22,7 @@ def parquet_to_Dataset(
             - path (str): The path to the parquet file.
             - exclude_columns (List[str]): The columns to exclude from the Dataset. Defaults to `None`.
             - include_columns (List[str]): The columns to include in the Dataset. Defaults to `None`.
+            - count (int): Number of rows to return. Defaults to `None`.
 
         Returns:
             - (tf.data.Dataset): The TensorFlow Dataset created from the DataFrame.
@@ -30,6 +32,7 @@ def parquet_to_Dataset(
 
     if exclude_columns: columns = [_ for _ in columns if (_ not in exclude_columns)]
     if include_columns: columns = [_ for _ in columns if (_ in include_columns)]
+    if count: df = df.iloc[:count]
 
     return tf.data.Dataset.from_tensor_slices(dict(df[columns]))
 
