@@ -9,34 +9,6 @@ from typing import List, Tuple, Optional, Dict, Text
 plt.style.use('seaborn-v0_8')
 
 
-def parquet_to_Dataset(
-    path: str,
-    include_columns: Optional[List[str]] = None,
-    exclude_columns: Optional[List[str]] = None,
-    count: Optional[int] = None,
-) -> tf.data.Dataset:
-    """
-        Reads and convert a parquet file into a TensorFlow Dataset.
-
-        Parameters:
-            - path (str): The path to the parquet file.
-            - exclude_columns (List[str]): The columns to exclude from the Dataset. Defaults to `None`.
-            - include_columns (List[str]): The columns to include in the Dataset. Defaults to `None`.
-            - count (int): Number of rows to return. Defaults to `None`.
-
-        Returns:
-            - (tf.data.Dataset): The TensorFlow Dataset created from the DataFrame.
-    """
-    df = pd.read_parquet(path)
-    columns = df.columns
-
-    if exclude_columns: columns = [_ for _ in columns if (_ not in exclude_columns)]
-    if include_columns: columns = [_ for _ in columns if (_ in include_columns)]
-    if count: df = df.iloc[:count]
-
-    return tf.data.Dataset.from_tensor_slices(dict(df[columns]))
-
-
 def train_test_split(
     dataset: tf.data.Dataset,
     train_size: float,
