@@ -46,7 +46,7 @@ class ListwiseRanking(BaseRanking):
                 [
                     query_embeddings,
                     candidate_embeddings
-                ], axis=2
+                ], axis=-1
             )
         )
 
