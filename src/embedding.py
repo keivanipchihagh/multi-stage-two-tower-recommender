@@ -1,4 +1,5 @@
 import numpy as np
+from typing import List
 import tensorflow as tf
 from typing import Dict, List
 
@@ -27,39 +28,41 @@ class Embedding(tf.keras.Model):
         """
         super().__init__()
 
-        self._embeddings: Dict[str, tf.keras.Sequential] = {}
+        self._embedding_dim = embedding_dim
+
+        self.embeddings: Dict[str, tf.keras.Sequential] = {}
 
         # String features
         for feature in str_features:
             _embedding_layer = self.__create_str_embedding_layer(
                 values = dataset.map(lambda _: _[feature]),
-                embedding_dim = embedding_dim,
+                embedding_dim = self._embedding_dim,
             )
-            self._embeddings[feature] = _embedding_layer
+            self.embeddings[feature] = _embedding_layer
 
         # Integer features
         for feature in int_features:
             _embedding_layer = self.__create_int_embedding_layer(
                 values = dataset.map(lambda _: _[feature]),
-                embedding_dim = embedding_dim,
+                embedding_dim = self._embedding_dim,
             )
-            self._embeddings[feature] = _embedding_layer
+            self.embeddings[feature] = _embedding_layer
 
         # Textual features
         for feature in text_features:
             _embedding_layer = self.__create_text_embedding_layer(
                 values = dataset.map(lambda _: _[feature]),
-                embedding_dim = embedding_dim,
+                embedding_dim = self._embedding_dim,
             )
-            self._embeddings[feature] = _embedding_layer
+            self.embeddings[feature] = _embedding_layer
 
         # Timestamp features
         for feature in timestamp_features:
             _embedding_layer = self.__create_timestamp_embedding_layer(
                 values = dataset.map(lambda _: _[feature]),
-                embedding_dim = embedding_dim,
+                embedding_dim = self._embedding_dim,
             )
-            self._embeddings[feature] = _embedding_layer
+            self.embeddings[feature] = _embedding_layer
 
 
     def __create_text_embedding_layer(
@@ -228,9 +231,17 @@ class Embedding(tf.keras.Model):
                 - (tf.tensor): returns the concatenated embeddings.
         """
         embeddings: List[tf.Tensor] = []
-        for feature in self._embeddings.keys():
-            embedding_layer = self._embeddings[feature]
+        for feature in self.embeddings.keys():
+            embedding_layer = self.embeddings[feature]
             embedding = embedding_layer(inputs[feature])
             embeddings.append(embedding)
 
         return tf.concat(embeddings, axis=-1)
+
+
+    @property
+    def embeddings_output_dim(self) -> int:
+        """
+            The output dimension of the embedding layer.
+        """
+        return len(self.embeddings.keys()) * self._embedding_dim

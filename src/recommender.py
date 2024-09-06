@@ -7,7 +7,7 @@ from src.retrieval import Retrieval
 from src.ranking.base import BaseRanking
 
 class RecommenderModel(tfrs.models.Model):
- 
+
     def __init__(
         self,
         query_tower: tf.keras.Model,
@@ -54,15 +54,8 @@ class RecommenderModel(tfrs.models.Model):
                     - candidate_embeddings (tf.Tensor): Candidate embeddings.
                     - ratings (tf.Tensor): Ratings.
         """
-        query_embeddings: tf.Tensor     = self.query_tower(inputs)
-        candidate_embeddings: tf.Tensor = self.candidate_tower(inputs)
-        ratings: tf.Tensor              = self.ranking_model(inputs)
-
-        return (
-            query_embeddings,
-            candidate_embeddings,
-            ratings,
-        )
+        ratings: tf.Tensor = self.ranking_model(inputs)
+        return ratings
 
 
     def compute_loss(
