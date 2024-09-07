@@ -10,14 +10,10 @@ make install
 This will ensure your environment is prepared with all required packages, ready to run the project.
 
 ### Usage
-...
-Once the environment is set up, you can start using the recommender system for tasks like training, evaluation, or inference.
-- **Training the Model:**
-- **Evaluating the Model:**
-- **Inference:**
+Run the [test.py](test.py) for a quick start.
 
 ## Dataset
-Different versions of the [MovieLens](https://grouplens.org/datasets/movielens/) dataset are used for both training and evaluation purposes. Due to significant data redundancy in the original datasets, I created the notebook [_dataset_maker.ipynb](_dataset_maker.ipynb) to generate separate files for movies, users, and ratings, effectively eliminating duplication and reducing the overal size of each datasets along side feature engineering and feature selection for the task.
+Different versions of the [MovieLens](https://grouplens.org/datasets/movielens/) dataset are used for both training and evaluation purposes. Due to significant data redundancy in the original datasets, I created the script [dataset.py](scripts/dataset.py) to generate separate files for movies, users, and ratings, effectively eliminating duplication and reducing the overal size of each datasets along side feature engineering and feature selection for the task. This is most similar to the data at hand in a production environment.
 
 ### Feature Selection
 - Retained all features from the original dataset, except for `raw_user_age`, which is only available in the `100k` version of the dataset.
@@ -28,9 +24,9 @@ Different versions of the [MovieLens](https://grouplens.org/datasets/movielens/)
 - Converted the `user_gender` feature from boolean values to integer representations.
 
 ## Project Structure
-- [data/](data) - Directory for storing versions of the [Movielense](https://grouplens.org/datasets/movielens/) dataset.
-- [src/](src) - Contains the core implementation, including model definitions, architecture, and utility functions.
-- [scripts/](scripts) - Setup scripts.
+- [data/](data) - Directory for storing *100k* and *1m* versions of the [Movielense](https://grouplens.org/datasets/movielens/) dataset.
+- [src/](src) - Contains the core implementation, including model definitions, architecture, and api functions.
+- [scripts/](scripts) - Useful scripts.
 
 ## 🖇References
 **Videos**

@@ -47,7 +47,17 @@ def retrieve(
 def rank(
     user: Dict[str, Any],
     movie: Dict[str, Any],
-):
+) -> float:
+    """
+        Perform ranking for a given user and movie.
+
+        Parameters:
+            - user (Dict[str, Any]): A dictionary containing the user's features.
+            - movie (Dict[str, Any]): A dictionary containing the movie's features.
+
+        Returns:
+            - score (float): A score representing how well the movie matches the user's preferences.
+    """
     user_tensors  = {k: tf.convert_to_tensor([v]) for k, v in user.items()}
     movie_tensors = {k: tf.convert_to_tensor([v]) for k, v in movie.items()}
 

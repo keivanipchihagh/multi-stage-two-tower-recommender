@@ -28,11 +28,15 @@ class Embedding(tf.keras.Model):
         """
         super().__init__()
 
+        # Embedding layers will be applied to each of the specified 
+        # features, with all layers having the same dimensionality.
         self._embedding_dim = embedding_dim
 
         self.embeddings: Dict[str, tf.keras.Sequential] = {}
 
-        # String features
+        # For string categorical features, the `StringLookup`
+        # layer will create a vocabulary that maps each string
+        # value to an integer index followed by an embedding layer.
         for feature in str_features:
             _embedding_layer = self.__create_str_embedding_layer(
                 values = dataset.map(lambda _: _[feature]),
@@ -40,7 +44,9 @@ class Embedding(tf.keras.Model):
             )
             self.embeddings[feature] = _embedding_layer
 
-        # Integer features
+        # For integer categorical features, the `StringLookup`
+        # layer will create a vocabulary that maps each string
+        # value to an integer index followed by an embedding layer.
         for feature in int_features:
             _embedding_layer = self.__create_int_embedding_layer(
                 values = dataset.map(lambda _: _[feature]),
@@ -48,7 +54,9 @@ class Embedding(tf.keras.Model):
             )
             self.embeddings[feature] = _embedding_layer
 
-        # Textual features
+        # For text features, the `TextVectorization` layer will
+        # create a vocabulary that maps each token to an integer
+        # index followed by an embedding layer.
         for feature in text_features:
             _embedding_layer = self.__create_text_embedding_layer(
                 values = dataset.map(lambda _: _[feature]),
@@ -56,7 +64,10 @@ class Embedding(tf.keras.Model):
             )
             self.embeddings[feature] = _embedding_layer
 
-        # Timestamp features
+        # Timestamp features will be discretized into buckets
+        # and the `Discretization` layer will create a vocabulary
+        # for the embedding layer. The value will finally be
+        # normalized between 0 and 1.
         for feature in timestamp_features:
             _embedding_layer = self.__create_timestamp_embedding_layer(
                 values = dataset.map(lambda _: _[feature]),

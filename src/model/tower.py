@@ -11,7 +11,7 @@ class Tower(tf.keras.Model):
     def __init__(
         self,
         embedding_model: Embedding,
-        cross_layer: tfrs.layers.dcn.Cross = None,
+        cross_layer_projection_dim: int = None,
         dense_layers: List[int] = [],
     ) -> 'Tower':
         """
@@ -25,8 +25,29 @@ class Tower(tf.keras.Model):
         super().__init__()
 
         self._embedding_model = embedding_model
-        self._cross_layer = deepcopy(cross_layer) if cross_layer else None
 
+        self._cross_layer  = None
+        self._dense_layers = []
+
+        # The projection dimension determines the size of the feature 
+        # space for learning cross-features. By employing low-rank 
+        # techniques to approximate the weight matrices of the DCN, 
+        # we can effectively reduce both training and serving costs.
+        # More: https://www.tensorflow.org/recommenders/examples/dcn
+        if cross_layer_projection_dim:
+            self._cross_layer = tfrs.layers.dcn.Cross(
+                projection_dim     = cross_layer_projection_dim,
+                kernel_initializer = "glorot_uniform"
+            )
+
+
+        # Larger and more complex models, though often delivering better 
+        # performance, generally require careful tuning. Nevertheless, it's 
+        # essential to include at least one dense layer in the tower to unify 
+        # the outputs from the embedding layers. This is necessary because 
+        # each tower may generate embeddings of varying sizes, depending on 
+        # the different features it processes.
+        # More: https://www.tensorflow.org/recommenders/examples/deep_recommenders
         self._dense_layers = tf.keras.Sequential(
             # With ReLU activation
             [
