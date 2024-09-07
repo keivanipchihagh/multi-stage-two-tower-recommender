@@ -3,7 +3,7 @@ import tensorflow as tf
 import tensorflow_recommenders as tfrs
 
 # Third-party
-from src.ranking.base import BaseRanking
+from src.model.ranking.base import BaseRanking
 
 class PointwiseRanking(BaseRanking):
 

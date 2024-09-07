@@ -3,8 +3,8 @@ from typing import Dict, Tuple
 import tensorflow_recommenders as tfrs
 
 # Third-party
-from src.retrieval import Retrieval
-from src.ranking.base import BaseRanking
+from src.model.retrieval import Retrieval
+from src.model.ranking.base import BaseRanking
 
 class RecommenderModel(tfrs.models.Model):
 

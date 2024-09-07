@@ -4,7 +4,7 @@ from copy import deepcopy
 import tensorflow_recommenders as tfrs
 
 # Third-party
-from src.embedding import Embedding
+from src.model.embedding import Embedding
 
 class Tower(tf.keras.Model):
 
