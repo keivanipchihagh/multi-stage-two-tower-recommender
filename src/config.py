@@ -16,3 +16,4 @@ API_LOG_LEVEL: str          = getenv("API_LOG_LEVEL", "info")
 # -- Models ---
 SCANN_PATH: str             = getenv("SCANN_PATH")
 BRUTE_PATH: str             = getenv("BRUTE_PATH")
+RANKING_PATH: str           = getenv("RANKING_PATH")

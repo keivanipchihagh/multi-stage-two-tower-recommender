@@ -1,9 +1,11 @@
+from typing import List
 from pydantic import BaseModel
 from fastapi import FastAPI, Request, status
 from prometheus_fastapi_instrumentator import Instrumentator
 
 # Third-party
-from infer import retrieve
+from infer import retrieve, rank
+
 
 APP = FastAPI()
 Instrumentator().instrument(APP).expose(APP)
@@ -19,7 +21,7 @@ class UserModel(BaseModel):
 class MovieModel(BaseModel):
     movie_id: str
     movie_title: str
-    movie_release_year: int
+    movie_release_year: str
 
 
 @APP.get(
@@ -54,5 +56,17 @@ async def api_v1_retrieval(
     status_code = status.HTTP_200_OK,
     tags = ['api', 'v1', 'ranking'],
 )
-async def api_v1_rank(request: Request):
-    raise NotImplementedError()
+async def api_v1_rank(movies: List[MovieModel], user: UserModel):
+
+    user_dict = user.model_dump()
+
+    movie_scores = {}
+    for movie in movies:
+        movie_dict = movie.model_dump()
+        movie_id = movie_dict.get('movie_id')
+
+        score = rank(user_dict, movie_dict)
+        
+        movie_scores[movie_id] = score
+
+    return movie_scores

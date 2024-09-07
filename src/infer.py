@@ -5,11 +5,13 @@ import tensorflow as tf
 
 from config import (
     SCANN_PATH,
-    BRUTE_PATH
+    BRUTE_PATH,
+    RANKING_PATH,
 )
 
 scann_retrieval = tf.saved_model.load(SCANN_PATH)
 brute_retrieval = tf.saved_model.load(BRUTE_PATH)
+ranking         = tf.saved_model.load(RANKING_PATH)
 
 
 def retrieve(
@@ -29,14 +31,27 @@ def retrieve(
         Returns:
             - identifiers (list): A list of item identifiers.
     """
-    user_tensor = {k: tf.convert_to_tensor([v]) for k, v in user.items()}
+    user_tensors = {k: tf.convert_to_tensor([v]) for k, v in user.items()}
 
     if approximate:
-        _ = scann_retrieval.signatures['call'](**user_tensor, k=k)  # Approximate
+        _ = scann_retrieval.signatures['call'](**user_tensors, k=k)  # Approximate
     else:
-        _ = brute_retrieval.signatures['call'](**user_tensor, k=k)  # Exact
+        _ = brute_retrieval.signatures['call'](**user_tensors, k=k)  # Exact
 
     identifiers = _['output_0'].numpy().tolist()
     affnities   = _['output_1'].numpy().tolist()
 
     return identifiers
+
+
+def rank(
+    user: Dict[str, Any],
+    movie: Dict[str, Any],
+):
+    user_tensors  = {k: tf.convert_to_tensor([v]) for k, v in user.items()}
+    movie_tensors = {k: tf.convert_to_tensor([v]) for k, v in movie.items()}
+
+    _ = ranking.signatures['call'](**user_tensors, **movie_tensors)
+    score = _['output_0'].numpy()[0][0].tolist()
+
+    return score
